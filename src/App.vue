@@ -1,22 +1,26 @@
 <template>
   <div id="app">
     <div>{{ $store.state.age }}</div>
-    <div>{{ $store.getters.getAge }}</div>
+    <div>{{ $store.getters.getOldAge }}</div>
     <button @click="addAge">加age</button>
-    <button @click="addTimeAge">过一段时间</button>
+   
   </div>
 </template>
 
 <script>
 export default {
   name: "App",
+  data: {},
   components: {},
+  mounted() {
+  },
+
   methods: {
     addAge() {
-      this.$store.commit("changeAge", 10);
+      this.$store.state.age+=1
     },
     addTimeAge() {
-      this.$store.dispatch("changeAge", 10);
+     this.$store.commit("changeAge", 10);
     },
   },
 };
