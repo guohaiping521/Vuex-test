@@ -1,9 +1,8 @@
 <template>
   <div id="app">
-    <div>{{ $store.state.age }}</div>
-    <div>{{ $store.getters.getOldAge }}</div>
-    <button @click="addAge">加age</button>
-   
+    <!-- <div>{{ $store.state.age }}</div>
+    <div>{{ $store.getters.getOldAge }}</div> -->
+    <!-- <button @click="addAge">加age</button> -->
   </div>
 </template>
 
@@ -12,15 +11,14 @@ export default {
   name: "App",
   data: {},
   components: {},
-  mounted() {
-  },
+  mounted() {},
 
   methods: {
     addAge() {
-      this.$store.state.age+=1
+      this.$store.state.age += 1;
     },
     addTimeAge() {
-     this.$store.commit("changeAge", 10);
+      this.$store.commit("changeAge", 10);
     },
   },
 };

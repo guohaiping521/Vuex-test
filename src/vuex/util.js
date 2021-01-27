@@ -5,4 +5,3 @@ const forEach = (arrayFn = {}, fn) => {
 }
 
 export { forEach };
-1
