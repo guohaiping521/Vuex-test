@@ -10,18 +10,16 @@ export default new Vuex.Store({
   },
   getters: {
     getAge(state) {
-      console.log("执行了getAge");
       return state.age;
     },
     getOldAge(state) {
-      console.log("执行了 getOldAge");
-      return state.oldAge + 10;
+      return state.oldAge;
     }
   },
   mutations: {
     changeAge(state, data) {
-      console.log("data");
       state.age += data;
+      console.log("执行了changeAge", state.age);
     },
     changeName(state, data) {
       state.name = data + "更改了";
@@ -38,7 +36,7 @@ export default new Vuex.Store({
   modules: {
     moduleA: {
       state: {
-        moduleAge: 10,
+        moduleAge: 30,
         moduleAoldAge: 11
       },
       getters: {
