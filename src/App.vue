@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div>{{ $store.state.age }}</div>
-    <div>{{ $store.getters.getOldAge }}</div>
+    <div>{{ $store.getters.getAge }}</div>
     <button @click="addAge">加age</button>
   </div>
 </template>
@@ -11,7 +11,9 @@ export default {
   name: "App",
   data: {},
   components: {},
-  mounted() {},
+  mounted() {
+    // console.log("mounter===",this.$store.getters);
+  },
 
   methods: {
     addAge() {

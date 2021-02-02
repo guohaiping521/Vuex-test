@@ -6,6 +6,7 @@ export default class ModuleCollection {
     }
     register(path, options) {
         let module = new Module(options);
+        this.newModule = module;
         if (path.length === 0) {//根部
             this.root = module;
         } else {//子孩子
@@ -21,5 +22,12 @@ export default class ModuleCollection {
         forEach(options.modules, (fn, fnName) => {
             this.register([...path, fnName], fn);
         })
+    }
+    getNamespaced(path) {
+        let root = this.root;
+        return path.reduce((prev, currentValue) => {
+            root = root.getChild(currentValue);
+            return prev + (root.namespaced ? currentValue + "/" : "")
+        }, "")
     }
 }

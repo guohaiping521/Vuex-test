@@ -5,6 +5,9 @@ export default class Module {
         this._children = {};
         this._rawModule = options;
     }
+    get namespaced() {
+        return this._rawModule.namespaced
+    }
     addChild(key, module) {
         this._children[key] = module;
     }

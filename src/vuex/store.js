@@ -2,7 +2,9 @@ import applyMixin from "./mixin"
 import ModuleCollection from "./module/module-collection"
 import { forEach } from "./util"
 let Vue;
+
 function installModule(store, rootState, path, modules) {
+    let nameSpaced = store._modules.getNamespaced(path);
     if (path.length > 0) {
         let parent = path.slice(0, -1).reduce((prev, currentValue) => {
             return prev[currentValue]
@@ -11,19 +13,24 @@ function installModule(store, rootState, path, modules) {
         Vue.set(parent, path[path.length - 1], modules.state);
     }
     modules.forEachMutations((mutation, fnName) => {
-        store._mutations[fnName] = store._mutations[fnName] || []
-        store._mutations[fnName].push((data) => {
-            return mutation.call(store, modules.state, data);
+        store._mutations[nameSpaced + fnName] = store._mutations[nameSpaced + fnName] || []
+        store._mutations[nameSpaced + fnName].push((data) => {
+            mutation.call(store, modules.state, data);
+            store._subscribers.forEach(sub => {
+
+                sub({ mutation, fnName }, store.state);
+            });
+
         })
     })
     modules.forEachActions((action, fnName) => {
-        store._actions[fnName] = store._actions[fnName] || []
-        store._actions[fnName].push((data) => {
+        store._actions[nameSpaced + fnName] = store._actions[nameSpaced + fnName] || []
+        store._actions[nameSpaced + fnName].push((data) => {
             action.call(store, rootState, data);
         });
     })
     modules.forEachGetters((getter, fnName) => {
-        store._wrappedGetters[fnName] = function () {
+        store._wrappedGetters[nameSpaced + fnName] = function () {
             //加上返回，不然undefined
             return getter.call(store, modules.state);
         }
@@ -35,6 +42,7 @@ function installModule(store, rootState, path, modules) {
 }
 function restoreVm(store, state) {
     let computed = {}
+    let oldVm = store._vm;
     store.getters = {}
     forEach(store._wrappedGetters, (getterFn, fnName) => {
         computed[fnName] = function () {//精华所在
@@ -54,56 +62,28 @@ function restoreVm(store, state) {
         },
         computed
     })
+    if (oldVm) {
+        Vue.nextTick(() => {
+            oldVm.$destroy()
+        })
+    }
 }
 class Store {
     constructor(options) {
         this._mutations = [];
         this._actions = [];
         this._wrappedGetters = [];
-
+        this._subscribers = []
         //1.收集用户传入的参数，树形结构
-        let moduleCollection = new ModuleCollection(options);
-        let state = moduleCollection.root.state;
+        this._modules = new ModuleCollection(options);
+        let state = this._modules.root.state;
         //2.安装模块，属性定义在store上
-        installModule(this, state, [], moduleCollection.root);
+        installModule(this, state, [], this._modules.root);
         restoreVm(this, state);
-        console.log(state);
-        //     this.getters = options.getters;
-        //     this.mutations = options.mutations;
-        //     this.actions = options.actions;
-        //     let computed = {}
-        //     this._mutations = []
-        //     this._actions = []
-        //     let state = options.state;
-        //     forEach(this.getters, (getterFn, fnName) => {
-        //         computed[fnName] = () => {
-        //             return getterFn(state);
-        //         };
-        //         Object.defineProperty(this.getters, fnName, {
-        //             get: () => {
-        //                 return this._vm[fnName];
-        //             }
-        //         });
-        //     });
-        //     forEach(this.mutations, (mutationFn, fnName) => {
-        //         this._mutations[fnName] = (data) => {
-        //             mutationFn(state, data);
-        //         };
-        //     });
-        //     forEach(this.actions, (actionFn, fnName) => {
-        //         this._actions[fnName] = (data) => {
-        //             actionFn(this, data);
-        //         };
-        //     });
-        //     //补充get与set方法，不然无法监听变化
-        //     this._vm = new Vue({
-        //         data() {
-        //             return {
-        //                 $$state: state
-        //             }
-        //         },
-        //         computed
-        //     })
+        //插件的实现
+        options.plugins.forEach(fn => {
+            fn(this)
+        });
     }
     commit = (fnName, data) => {
         forEach(this._mutations[fnName], (mutation, fnName) => {
@@ -117,6 +97,18 @@ class Store {
     }
     get state() {
         return this._vm._data.$$state;
+    }
+    registerModule(path, options) {
+        if (typeof path == 'string') path = [path]
+        this._modules.register(path, options);
+        installModule(this, this._modules.root.state, [], this._modules.newModule);
+        restoreVm(this, this._modules.root.state);
+    }
+    subscribe(fn) {
+        this._subscribers.push(fn)
+    }
+    replaceState(newState) {
+        this._vm._data.$$state = newState;
     }
 }
 const install = (plugin) => {
