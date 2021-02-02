@@ -2,7 +2,8 @@
   <div id="app">
     <div>{{ $store.state.age }}</div>
     <div>{{ $store.getters.getAge }}</div>
-    <button @click="addAge">加age</button>
+    <button @click="addAge">同步加age</button>
+    <button @click="addTimeAge">异步加age</button>
   </div>
 </template>
 
@@ -20,7 +21,7 @@ export default {
       this.$store.commit("changeAge", 10);
     },
     addTimeAge() {
-      this.$store.commit("changeAge", 10);
+      this.$store.dispatch("changeAge", 10);
     },
   },
 };

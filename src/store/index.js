@@ -6,14 +6,19 @@ Vue.use(Vuex)
 function persists(store) {
   let local = localStorage.getItem("VUEX:STATE");
   if (local) {
-    store.replaceState(JSON.parse(local));
+    store.replaceState(JSON.parse(local))
   }
   store.subscribe((mutation, state) => {
-    
+    console.log("state==", state);
     localStorage.setItem("VUEX:STATE", JSON.stringify(state));
   })
 }
+//strict options
+//同步的watcher与异步的water
+//_withCommitting
+
 let store = new Vuex.Store({
+  strict: true,
   plugins: [
     persists,
     // logger()
@@ -24,6 +29,7 @@ let store = new Vuex.Store({
   },
   getters: {
     getAge(state) {
+      console.log("getAge", state);
       return state.age;
     },
     getOldAge(state) {
@@ -33,6 +39,7 @@ let store = new Vuex.Store({
   mutations: {
     changeAge(state, data) {
       state.age += data;
+      console.log("调用channggeAge", state.age);
     },
     changeName(state, data) {
       state.name = data + "更改了";
