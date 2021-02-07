@@ -20,7 +20,7 @@ function persists(store) {
 let store = new Vuex.Store({
   strict: true,
   plugins: [
-    persists,
+    // persists,
     // logger()
   ],
   state: {
@@ -29,7 +29,6 @@ let store = new Vuex.Store({
   },
   getters: {
     getAge(state) {
-      console.log("getAge", state);
       return state.age;
     },
     getOldAge(state) {

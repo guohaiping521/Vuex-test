@@ -39,9 +39,7 @@ function installModule(store, rootState, path, modules) {
         store._wrappedGetters[nameSpaced + fnName] = function () {
             //加上返回，不然undefined(这是执行方法，目前就是store.state更新了（会调用get state()方法），
             //但是modules.state与其他都没有更新）,需要进行更新操作
-            // store._withCommit(() => {
             return getter.call(store, getState(store, path));
-            // });
         }
     })
 
